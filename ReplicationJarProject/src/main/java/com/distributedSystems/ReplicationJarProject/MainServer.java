@@ -1,5 +1,6 @@
 package com.distributedSystems.ReplicationJarProject;
 
+import com.distributedSystems.ReplicationJarProject.Jar.Product;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
@@ -8,6 +9,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 
 @SpringBootApplication(scanBasePackages = { "com.distributedSystems.ReplicationJarProject" })
@@ -27,4 +30,5 @@ public class MainServer implements WebServerFactoryCustomizer<ConfigurableWebSer
 	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
 		return String.format("Hello %s!", name);
 	}
+
 }
