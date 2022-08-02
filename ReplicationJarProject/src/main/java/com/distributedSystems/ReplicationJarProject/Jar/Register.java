@@ -1,8 +1,9 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Register {
+public class Register implements Serializable{
 
     String name;
     Date date;
