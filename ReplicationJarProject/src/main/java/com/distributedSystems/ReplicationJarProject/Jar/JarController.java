@@ -1,10 +1,12 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -12,29 +14,35 @@ import java.util.List;
 @RequestMapping(path = "api/v1/jar")
 public class JarController {
 
+
     private final JarService jarService;
 
     @Autowired
     public JarController(JarService service) {
         this.jarService = service;
-
     }
+
 
     @GetMapping("/get-product")
     @ResponseBody
+
     public ProductResponse getProduct(){
         return jarService.getProduct(12, "A");
+
     }
 
     @GetMapping("/get-movements")
     @ResponseBody
     public List<Register> getMovements(){
+
         return jarService.getMovements();
     }
 
     @GetMapping("/fill-jar")
     public List<Register> fillJar() {
+
         return jarService.fillJar();
+
     }
 
     @GetMapping("/save-state")

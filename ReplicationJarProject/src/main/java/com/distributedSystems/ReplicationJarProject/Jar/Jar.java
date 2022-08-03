@@ -2,6 +2,9 @@ package com.distributedSystems.ReplicationJarProject.Jar;
 
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+
 import java.rmi.AlreadyBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -39,14 +42,14 @@ public class Jar {
 
     public ProductResponse getProduct(int number, String type) {
         ProductResponse response = null;
-        if(type == "A"){
-            if(products_A >= number){
+        if (type == "A") {
+            if (products_A >= number) {
                 products_A = products_A - number;
                 response = new ProductResponse(number, type);
             }
 
-        }else{
-            if(products_B >= number){
+        } else {
+            if (products_B >= number) {
                 products_B = products_B - number;
                 response = new ProductResponse(number, type);
             }
@@ -59,8 +62,8 @@ public class Jar {
         products_A = products_A + 60;
         products_B = products_B + 40;
         System.out.println("FillJar requested: \n" +
-                "A products: "+ products_A+", \n" +
-                "B products: "+products_B);
+                "A products: " + products_A + ", \n" +
+                "B products: " + products_B);
         return
                 List.of(
                         new Register("ADD 60 PRODUCT A"),
@@ -69,33 +72,11 @@ public class Jar {
     }
 
 
-    public String saveState(){
+    public String saveState() {
         return "En espera para confirmar cambios...";
     }
 
-    public String restoreState(){
+    public String restoreState() {
         return "Restaurando estado...";
-    }
-//
-
-
-    public static void main(String[] args) throws RemoteException, AlreadyBoundException{
-        Remote remote = UnicastRemoteObject.exportObject(new JarInterface() {
-
-            @Override
-            public void sendMovements() throws RemoteException {
-                System.out.println("Yoohoo!");
-            }
-
-            @Override
-            public void readTransactions() throws RemoteException {
-                
-            }
-            
-        }, 0);
-
-        Registry registry = LocateRegistry.createRegistry(port);
-        System.out.println("Listening on port " + String.valueOf(port));
-        registry.bind("Jar", remote);
     }
 }
