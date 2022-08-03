@@ -4,12 +4,19 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class Register implements Serializable{
-
     String name;
+    char type;
+    int amount;
+    String operation;
+    int remaining;
     Date date;
 
-    public Register(String name) {
+    public Register(String name, char type, int amount, String operation, int remaining) {
         this.name = name;
+        this.type = type;
+        this.amount = amount;
+        this.operation = operation;
+        this.remaining = remaining;
         this.date = new Date();
     }
 

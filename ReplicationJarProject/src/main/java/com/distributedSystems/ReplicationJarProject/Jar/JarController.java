@@ -25,27 +25,27 @@ public class JarController {
     @GetMapping("/get-product")
     @ResponseBody
     public Product getProduct() throws RemoteException{
-        jarIf.logTransaction(new Register("GET PRODUCT"));
+        jarIf.logTransaction(new Register("Actor", 'A', 1, "GET", 0));
         return new Product("A");
     }
 
     @GetMapping("/get-movements")
     @ResponseBody
     public List<Register> getMovements(){
-        return
-                List.of(
+        return null;
+                /*List.of(
                         new Register("ADD PRODUCT"),
                         new Register("GET PRODUCT")
-                );
+                );*/
     }
 
     @GetMapping("/fill-jar")
     public List<Register> fillJar() {
-        return
-                List.of(
+        return null;
+                /*List.of(
                         new Register("ADD PRODUCT"),
                         new Register("ADD PRODUCT")
-                );
+                );*/
     }
 
     @GetMapping("/save-state")
