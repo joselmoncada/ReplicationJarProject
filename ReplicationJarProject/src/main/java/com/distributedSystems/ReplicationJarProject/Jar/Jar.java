@@ -12,6 +12,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.simple.JSONArray;
@@ -29,7 +31,7 @@ public class Jar {
         Remote remote = UnicastRemoteObject.exportObject(new JarInterface() {
             // Returns list of transactions recorded in movements.json
             @Override
-            public List<Register> sendMovements() throws RemoteException {
+            public List<Register> sendMovements() throws RemoteException, NumberFormatException, ParseException {
                 JSONParser parser = new JSONParser();
                 JSONArray movementList = new JSONArray();
                 List<Register> temporary = new ArrayList<Register>();
@@ -54,8 +56,8 @@ public class Jar {
                         o.get("type").toString(),
                         Integer.valueOf(o.get("amount").toString()),
                         o.get("operation").toString(),
-                        Integer.valueOf(o.get("remaining").toString())/*,
-                        AQUI VA LA FECHA */));
+                        Integer.valueOf(o.get("remaining").toString()),
+                        new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(o.get("date").toString())));
                 }
                 return temporary;
             }
@@ -84,7 +86,7 @@ public class Jar {
                 object.put("amount", register.getAmount());
                 object.put("operation", register.getOperation());
                 object.put("remaining", register.getRemaining());
-                object.put("date", register.getDate().toString());
+                object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(register.getDate()));
                 movementList.add(object);
                 try {
                     file = new FileWriter("movements.json");

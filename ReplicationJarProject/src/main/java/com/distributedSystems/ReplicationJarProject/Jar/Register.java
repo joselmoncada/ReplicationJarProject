@@ -21,6 +21,15 @@ public class Register implements Serializable {
         this.date = new Date();
     }
 
+    public Register(String name, String type, int amount, String operation) {
+        this.name = name;
+        this.type = type;
+        this.amount = amount;
+        this.operation = operation;
+        this.remaining = -1;
+        this.date = new Date();
+    }
+
     public Register(String name, String type, int amount, String operation, int remaining, Date date) {
         this.name = name;
         this.type = type;
