@@ -26,17 +26,12 @@ public class JarService {
         jar = new Jar();
     }
 
-    public List<Register> getMovements(){
-
-        return
-                List.of(
-                        new Register("ADD PRODUCT"),
-                        new Register("GET PRODUCT")
-                );
+    public List<Register> getMovements() throws RemoteException{
+        return jarIf.sendMovements();
     }
 
-    public ProductResponse getProduct(int number, String type) {
-        //jarIf.logTransaction(new Register("Actor", "A", 1, "GET", 0));
+    public ProductResponse getProduct(int number, String type) throws RemoteException {
+        jarIf.logTransaction(new Register("Actor", "A", 1, "GET", 0));
         return  jar.getProduct(number, type);
     }
 

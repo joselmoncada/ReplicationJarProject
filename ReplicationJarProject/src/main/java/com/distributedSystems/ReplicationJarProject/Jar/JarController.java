@@ -27,14 +27,14 @@ public class JarController {
 
     @GetMapping("/get-product")
     @ResponseBody
-    public ProductResponse getProduct(){
+    public ProductResponse getProduct() throws RemoteException{
         return jarService.getProduct(12, "A");
 
     }
 
     @GetMapping("/get-movements")
     @ResponseBody
-    public List<Register> getMovements(){
+    public List<Register> getMovements() throws RemoteException{
 
         return jarService.getMovements();
     }
