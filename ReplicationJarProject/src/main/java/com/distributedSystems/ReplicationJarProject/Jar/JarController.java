@@ -1,8 +1,12 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.web.bind.annotation.*;
+
+import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -14,48 +18,42 @@ import java.util.List;
 @RequestMapping(path = "api/v1/jar")
 public class JarController {
 
-    private Registry registry;
-    private JarInterface jarIf;
+    private final JarService jarService;
 
-    public JarController() throws RemoteException, NotBoundException{
-        registry = LocateRegistry.getRegistry("localhost", 8099);
-        jarIf = (JarInterface) registry.lookup("Jar");
+    @Autowired
+    public JarController(JarService service) {
+        this.jarService = service;
     }
 
     @GetMapping("/get-product")
     @ResponseBody
-    public Product getProduct() throws RemoteException{
-        jarIf.logTransaction(new Register("Actor", 'A', 1, "GET", 0));
-        return new Product("A");
+    public ProductResponse getProduct(){
+        return jarService.getProduct(12, "A");
+
     }
 
     @GetMapping("/get-movements")
     @ResponseBody
     public List<Register> getMovements(){
-        return null;
-                /*List.of(
-                        new Register("ADD PRODUCT"),
-                        new Register("GET PRODUCT")
-                );*/
+
+        return jarService.getMovements();
     }
 
     @GetMapping("/fill-jar")
     public List<Register> fillJar() {
-        return null;
-                /*List.of(
-                        new Register("ADD PRODUCT"),
-                        new Register("ADD PRODUCT")
-                );*/
+
+        return jarService.fillJar();
+
     }
 
     @GetMapping("/save-state")
     public String saveState(){
-        return "En espera para confirmar cambios...";
+       return jarService.saveState();
     }
 
     @GetMapping("/restore-state")
     public String restoreState(){
-        return "Restaurando estado...";
+        return jarService.restoreState();
     }
 //
 //    (POST) fillJar
