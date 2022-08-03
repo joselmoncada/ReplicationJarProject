@@ -1,6 +1,7 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
 
+import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,7 @@ public class JarController {
     }
 
     @GetMapping("/fill-jar")
-    public List<Register> fillJar() {
+    public FillingResponse fillJar() {
 
         return jarService.fillJar();
 

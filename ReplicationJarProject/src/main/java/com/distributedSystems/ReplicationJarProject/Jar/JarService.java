@@ -1,5 +1,6 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,12 +41,11 @@ public class JarService {
         return  jar.getProduct(number, type);
     }
 
-    public List<Register> fillJar() {
-        return
-                List.of(
-                        new Register("ADD PRODUCT"),
-                        new Register("ADD PRODUCT")
-                );
+    public FillingResponse fillJar() {
+        FillingResponse response = new FillingResponse(60,40,120, 80);
+        System.out.println("FILL JAR: "+ response);
+        return response;
+
     }
 
 

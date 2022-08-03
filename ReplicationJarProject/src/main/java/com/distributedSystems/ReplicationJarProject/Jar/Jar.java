@@ -1,5 +1,6 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
 
 import java.io.FileReader;
@@ -121,17 +122,19 @@ public class Jar {
         return response;
     }
 
-    public List<Register> fillJar() {
+    public FillingResponse fillJar() {
+        FillingResponse response = new FillingResponse();
+        response.setPrevious_A(products_A);
+        response.setPrevious_B(products_B);
         products_A = products_A + 60;
         products_B = products_B + 40;
+
+        response.setCurrent_A(products_A);
+        response.setCurrent_B(products_B);
         System.out.println("FillJar requested: \n" +
                 "A products: " + products_A + ", \n" +
                 "B products: " + products_B);
-        return
-                List.of(
-                        new Register("ADD 60 PRODUCT A"),
-                        new Register("ADD 40 PRODUCT B")
-                );
+        return response;
     }
 
 
