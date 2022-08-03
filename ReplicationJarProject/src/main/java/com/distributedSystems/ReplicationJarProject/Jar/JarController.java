@@ -13,6 +13,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -28,14 +29,14 @@ public class JarController {
 
     @GetMapping("/get-product")
     @ResponseBody
-    public ProductResponse getProduct(){
+    public ProductResponse getProduct() throws RemoteException{
         return jarService.getProduct(12, "A");
 
     }
 
     @GetMapping("/get-movements")
     @ResponseBody
-    public List<Register> getMovements(){
+    public List<Register> getMovements() throws RemoteException, NumberFormatException, ParseException{
 
         return jarService.getMovements();
     }

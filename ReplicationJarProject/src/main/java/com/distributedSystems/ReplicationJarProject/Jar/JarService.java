@@ -11,6 +11,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.text.ParseException;
 import java.util.List;
 
 @Service
@@ -27,18 +28,17 @@ public class JarService {
         jar = new Jar();
     }
 
-    public List<Register> getMovements(){
-
-        return
-                List.of(
-                        new Register("ADD PRODUCT"),
-                        new Register("GET PRODUCT")
-                );
+    public List<Register> getMovements() throws RemoteException, NumberFormatException, ParseException{
+        return jarIf.sendMovements();
     }
 
-    public ProductResponse getProduct(int number, String type) {
-        //jarIf.logTransaction(new Register("Actor", "A", 1, "GET", 0));
-        return  jar.getProduct(number, type);
+    public ProductResponse getProduct(int number, String type) throws RemoteException {
+        ProductResponse response = jar.getProduct(number, type);
+        int remaining = 0;
+        if (type == "A") remaining = jar.getProducts_A();
+        else if (type == "B") remaining = jar.getProducts_B();
+        jarIf.logTransaction(new Register("Actor", type, number, "GET", remaining));
+        return response;
     }
 
     public FillingResponse fillJar() {

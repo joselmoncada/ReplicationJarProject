@@ -12,6 +12,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,18 +29,40 @@ public class Jar {
 
     public static void main(String[] args) throws RemoteException, AlreadyBoundException{
         Remote remote = UnicastRemoteObject.exportObject(new JarInterface() {
-
+            // Returns list of transactions recorded in movements.json
             @Override
-            public List<Register> sendMovements() throws RemoteException {
+            public List<Register> sendMovements() throws RemoteException, NumberFormatException, ParseException {
+                JSONParser parser = new JSONParser();
+                JSONArray movementList = new JSONArray();
+                List<Register> temporary = new ArrayList<Register>();
                 System.out.println("Reading movement JSON...");
-                return null;
+                try {
+                    reader = new FileReader("movements.json");
+                    Object object = parser.parse(reader);
+                    movementList = (JSONArray) object;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        reader.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (Object object : movementList) {
+                    JSONObject o = (JSONObject) object;
+                    temporary.add(new Register(
+                        o.get("name").toString(),
+                        o.get("type").toString(),
+                        Integer.valueOf(o.get("amount").toString()),
+                        o.get("operation").toString(),
+                        Integer.valueOf(o.get("remaining").toString()),
+                        new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(o.get("date").toString())));
+                }
+                return temporary;
             }
 
-            @Override
-            public void readTransactions() throws RemoteException {
-                
-            }
-
+            // Logs a transaction in movements.json
             @Override
             public void logTransaction(Register register) throws RemoteException {
                 JSONParser parser = new JSONParser();
@@ -57,7 +82,11 @@ public class Jar {
                 }
                 JSONObject object = new JSONObject();
                 object.put("name", register.getName());
-                object.put("date", register.getDate().toString());
+                object.put("type", register.getType());
+                object.put("amount", register.getAmount());
+                object.put("operation", register.getOperation());
+                object.put("remaining", register.getRemaining());
+                object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(register.getDate()));
                 movementList.add(object);
                 try {
                     file = new FileWriter("movements.json");
