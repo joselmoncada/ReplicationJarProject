@@ -30,7 +30,9 @@ public class JarController {
     @GetMapping("/get-product")
     @ResponseBody
     public ProductResponse getProduct() throws RemoteException{
-        return jarService.getProduct(12, "A");
+        ProductResponse response = jarService.getProduct(12, "A");
+        System.out.println("RESULTADO JAR CONTROLLER: "+response);
+        return response;
 
     }
 
@@ -42,19 +44,19 @@ public class JarController {
     }
 
     @GetMapping("/fill-jar")
-    public FillingResponse fillJar() {
+    public FillingResponse fillJar()  throws RemoteException{
 
         return jarService.fillJar();
 
     }
 
     @GetMapping("/save-state")
-    public String saveState(){
+    public String saveState()  throws RemoteException {
        return jarService.saveState();
     }
 
     @GetMapping("/restore-state")
-    public String restoreState(){
+    public String restoreState()  throws RemoteException{
         return jarService.restoreState();
     }
 //

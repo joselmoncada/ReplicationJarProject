@@ -2,10 +2,7 @@ package com.distributedSystems.ReplicationJarProject.Jar;
 
 import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -18,14 +15,13 @@ import java.util.List;
 public class JarService {
     private static final String IP = "127.0.0.1";
     private static final int PUERTO = 1100;
-    private final Jar jar;
     private Registry registry;
     private JarInterface jarIf;
 
     public JarService() throws RemoteException, NotBoundException {
         registry = LocateRegistry.getRegistry("localhost", 8099);
         jarIf = (JarInterface) registry.lookup("Jar");
-        jar = new Jar();
+
     }
 
     public List<Register> getMovements() throws RemoteException, NumberFormatException, ParseException{
@@ -33,27 +29,23 @@ public class JarService {
     }
 
     public ProductResponse getProduct(int number, String type) throws RemoteException {
-        ProductResponse response = jar.getProduct(number, type);
-        int remaining = 0;
-        if (type == "A") remaining = jar.getProducts_A();
-        else if (type == "B") remaining = jar.getProducts_B();
-        jarIf.logTransaction(new Register("Actor", type, number, "GET", remaining));
+        ProductResponse response = jarIf.getProduct(number, type);
+        System.out.println("RESULTADO JAR Service: "+response);
         return response;
     }
 
-    public FillingResponse fillJar() {
-        FillingResponse response = new FillingResponse(60,40,120, 80);
+    public FillingResponse fillJar()  throws RemoteException {
+        FillingResponse response = jarIf.fillJar();
         System.out.println("FILL JAR: "+ response);
         return response;
-
     }
 
 
-    public String saveState(){
+    public String saveState()  throws RemoteException{
         return "En espera para confirmar cambios...";
     }
 
-    public String restoreState(){
+    public String restoreState()  throws RemoteException{
         return "Restaurando estado...";
     }
 //

@@ -20,14 +20,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class Jar {
+public class JarRMIServer {
     private static final int port = 8099;
     private static FileWriter file;
     private static FileReader reader;
-    int products_A;
-    int products_B;
 
+    public JarRMIServer() {
+
+    }
     public static void main(String[] args) throws RemoteException, AlreadyBoundException{
+        Jar jar = new Jar();
         Remote remote = UnicastRemoteObject.exportObject(new JarInterface() {
             // Returns list of transactions recorded in movements.json
             @Override
@@ -103,7 +105,19 @@ public class Jar {
                     }
                 }
             }
-            
+
+            @Override
+            public ProductResponse getProduct(int number, String type) {
+                System.out.println("RESULTADO JAR RMI");
+                 return jar.getProduct(number, type);
+            }
+
+            @Override
+            public FillingResponse fillJar() {
+                return jar.fillJar();
+            }
+
+
         }, 0);
 
         Registry registry = LocateRegistry.createRegistry(port);
@@ -111,67 +125,74 @@ public class Jar {
         registry.bind("Jar", remote);
     }
 
-    public int getProducts_A() {
-        return products_A;
-    }
 
-    public void setProducts_A(int products_A) {
-        this.products_A = products_A;
-    }
+    private static class Jar {
+        int products_A;
+        int products_B;
 
-    public int getProducts_B() {
-        return products_B;
-    }
-
-    public void setProducts_B(int products_B) {
-        this.products_B = products_B;
-    }
-
-    public Jar() {
-        this.products_A = 60;
-        this.products_B = 40;
-    }
-
-
-    public ProductResponse getProduct(int number, String type) {
-        ProductResponse response = null;
-        if (type == "A") {
-            if (products_A >= number) {
-                products_A = products_A - number;
-                response = new ProductResponse(number, type);
-            }
-
-        } else {
-            if (products_B >= number) {
-                products_B = products_B - number;
-                response = new ProductResponse(number, type);
-            }
+        public Jar() {
+            this.products_A = 60;
+            this.products_B = 40;
         }
 
-        return response;
-    }
 
-    public FillingResponse fillJar() {
-        FillingResponse response = new FillingResponse();
-        response.setPrevious_A(products_A);
-        response.setPrevious_B(products_B);
-        products_A = products_A + 60;
-        products_B = products_B + 40;
+        public int getProducts_A() {
+            return products_A;
+        }
 
-        response.setCurrent_A(products_A);
-        response.setCurrent_B(products_B);
-        System.out.println("FillJar requested: \n" +
-                "A products: " + products_A + ", \n" +
-                "B products: " + products_B);
-        return response;
-    }
+        public void setProducts_A(int products_A) {
+            this.products_A = products_A;
+        }
+
+        public int getProducts_B() {
+            return products_B;
+        }
+
+        public void setProducts_B(int products_B) {
+            this.products_B = products_B;
+        }
 
 
-    public String saveState() {
-        return "En espera para confirmar cambios...";
-    }
+        public ProductResponse getProduct(int number, String type) {
+            ProductResponse response = null;
+            if (type == "A") {
+                if (products_A >= number) {
+                    products_A = products_A - number;
+                    response = new ProductResponse(number, type);
+                }
 
-    public String restoreState() {
-        return "Restaurando estado...";
+            } else {
+                if (products_B >= number) {
+                    products_B = products_B - number;
+                    response = new ProductResponse(number, type);
+                }
+            }
+            System.out.println("RESULTADO JAR: "+response);
+            return response;
+        }
+
+        public FillingResponse fillJar() {
+            FillingResponse response = new FillingResponse();
+            response.setPrevious_A(products_A);
+            response.setPrevious_B(products_B);
+            products_A = products_A + 60;
+            products_B = products_B + 40;
+
+            response.setCurrent_A(products_A);
+            response.setCurrent_B(products_B);
+            System.out.println("FillJar requested: \n" +
+                    "A products: " + products_A + ", \n" +
+                    "B products: " + products_B);
+            return response;
+        }
+
+        public String saveState() {
+            return "En espera para confirmar cambios...";
+        }
+
+        public String restoreState() {
+            return "Restaurando estado...";
+        }
+
     }
 }

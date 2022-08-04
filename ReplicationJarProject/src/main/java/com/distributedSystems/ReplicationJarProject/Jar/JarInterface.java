@@ -1,5 +1,8 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
+import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.text.ParseException;
@@ -9,5 +12,7 @@ public interface JarInterface extends Remote{
 
     public List<Register> sendMovements() throws RemoteException, NumberFormatException, ParseException;
     public void logTransaction(Register register) throws RemoteException;
+    public ProductResponse getProduct(int number, String type)  throws RemoteException;
+    public FillingResponse fillJar()  throws RemoteException;
 
 }
