@@ -52,6 +52,7 @@ public class JarController {
 
     @GetMapping("/save-state")
     public String saveState()  throws RemoteException {
+        System.out.println("SAVE STATE ENDPOINT REACHED");
        return jarService.saveState();
     }
 

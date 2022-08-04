@@ -14,5 +14,6 @@ public interface JarInterface extends Remote{
     public void logTransaction(Register register) throws RemoteException;
     public ProductResponse getProduct(int number, String type)  throws RemoteException;
     public FillingResponse fillJar()  throws RemoteException;
-
+    public int getProducts_B() throws RemoteException ;
+    public int getProducts_A() throws RemoteException;
 }

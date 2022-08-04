@@ -1,14 +1,20 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
+import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
 import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
 import org.springframework.stereotype.Service;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -42,6 +48,28 @@ public class JarService {
 
 
     public String saveState()  throws RemoteException{
+
+
+        try{
+            Socket socket = new Socket("localhost",4444);
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+
+            System.out.println("CONEXION CON EL BACKUP COORDINATOR ESTABLECIDA");
+            BackUpRequest backUpRequest =  new BackUpRequest(
+                    jarIf.getProducts_A(),
+                    jarIf.getProducts_B(),
+                    new Date()
+            );
+            outputStream.writeObject(backUpRequest);
+
+
+        }catch (Exception e){
+            System.out.println("Ocurrio un error: "+e);
+            e.printStackTrace();
+        }
+
         return "En espera para confirmar cambios...";
     }
 

@@ -1,10 +1,17 @@
 package com.distributedSystems.ReplicationJarProject.BackUpCoordinator;
 
+import com.distributedSystems.ReplicationJarProject.Jar.Register;
 import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class BackUpCoordinator {
 
@@ -30,6 +37,7 @@ public class BackUpCoordinator {
         try {
             System.out.println("SERVIDOR ESPERANDO CLIENTES EN PUERTO: "+port);
             serverSocket = new ServerSocket(port);
+
             while (true){
 
                 Socket clientSocket = serverSocket.accept();
@@ -52,6 +60,8 @@ public class BackUpCoordinator {
         private Socket clientSocket;
         public ObjectInputStream in;
         public ObjectOutputStream out;
+        private  FileWriter file;
+        private  FileReader reader;
 
         public BackUpCoordinatorClientHandler(Socket socket) {
             this.clientSocket = socket;
@@ -59,9 +69,44 @@ public class BackUpCoordinator {
 
         }
 
+        public void logTransaction(BackUpRequest request) throws RemoteException {
+            JSONParser parser = new JSONParser();
+            JSONArray movementList = new JSONArray();
+            try {
+                reader = new FileReader("states.json");
+                Object object = parser.parse(reader);
+                movementList = (JSONArray) object;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            JSONObject object = new JSONObject();
+            object.put("productA", request.getProduct_A_amount());
+            object.put("productB", request.getGetProduct_B_amount());
+            object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()));
+            movementList.add(object);
+            try {
+                file = new FileWriter("movements.json");
+                file.write(movementList.toJSONString());
+                System.out.println("Logged " + object);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    file.flush();
+                    file.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         public void run() {
-
-
 
             try {
                 System.out.println("Server accepted new client, Thread: "+Thread.currentThread().getId());
@@ -71,20 +116,55 @@ public class BackUpCoordinator {
 
                 Object request =  in.readObject(); //Receives a request
                 System.out.println("REQUEST NAME: "+ request.getClass().getSimpleName());
-                synchronized (this) { //A process is either filling the stores or taking an ingredient from them, not both
+                synchronized (this) { //A process is doing one activity at the time
                     switch (request.getClass().getSimpleName()) {
-                        case "BackUp": //The seller is filling the stores
-                            /**Seller Fill Store**/
+                        case "BackUpRequest": //The producers ask for a backup
+
                             BackUpRequest backUpRequest = (BackUpRequest) request;
                             System.out.println("BackUp request received: " + backUpRequest);
-                                //todo manejar logica de negocio del backup
+                            VoteRequest voteRequest = new VoteRequest();
+                            //Establece conexion con el consumer
+                            try{
+                                Socket socket = new Socket("localhost",4446);
+                                ObjectOutputStream consumerOutputStream = new ObjectOutputStream(socket.getOutputStream());
+
+                                ObjectInputStream consumerInputStream = new ObjectInputStream(socket.getInputStream());
+
+                                System.out.println("CONEXION CON EL CONSUMER ESTABLECIDA");
+
+                                consumerOutputStream.writeObject(voteRequest);
+                                VoteRequest voteConsumerResponse = (VoteRequest) consumerInputStream.readObject();
+                                System.out.println("Consumer Vote Request Response: "+voteConsumerResponse);
+
+                            }catch (Exception e){
+                                System.out.println("Ocurrio un error: "+e);
+                                e.printStackTrace();
+                            }
+                            //Establece consexión con el producer
+
+                            try{
+                                Socket socket = new Socket("localhost",4447);
+                                ObjectOutputStream producerOutputStream = new ObjectOutputStream(socket.getOutputStream());
+
+                                ObjectInputStream producerInputStream = new ObjectInputStream(socket.getInputStream());
+
+                                System.out.println("CONEXION CON EL Producer ESTABLECIDA");
+
+                                producerOutputStream.writeObject(voteRequest);
+                                VoteRequest voteConsumerResponse = (VoteRequest) producerInputStream.readObject();
+
+
+                            }catch (Exception e){
+                                System.out.println("Ocurrio un error: "+e);
+                                e.printStackTrace();
+                            }
                             System.out.println("BackUp request fulfilled: ");
 
                             break;
-                        case "VoteRequest": //The smoker is taking an item
+                        case "VoteRequest": //Receives the vote response of producer or consumer
 
-                            VoteRequest voteRequest = (VoteRequest) request;
-                            System.out.println("Vote Request received: " + voteRequest);
+//                            VoteRequest voteRequest = (VoteRequest) request;
+//                            System.out.println("Vote Request received: " + voteRequest);
 
                            //todo manejar logica de votos para el global commit
 

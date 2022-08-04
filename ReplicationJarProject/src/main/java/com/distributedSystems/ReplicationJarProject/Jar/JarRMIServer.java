@@ -107,14 +107,24 @@ public class JarRMIServer {
             }
 
             @Override
-            public ProductResponse getProduct(int number, String type) {
+            public ProductResponse getProduct (int number, String type) throws RemoteException{
                 System.out.println("RESULTADO JAR RMI");
                  return jar.getProduct(number, type);
             }
 
             @Override
-            public FillingResponse fillJar() {
+            public FillingResponse fillJar() throws RemoteException {
                 return jar.fillJar();
+            }
+
+            @Override
+            public int getProducts_B() throws RemoteException {
+                return jar.getProducts_A();
+            }
+
+            @Override
+            public int getProducts_A() throws RemoteException {
+                return jar.getProducts_B();
             }
 
 
