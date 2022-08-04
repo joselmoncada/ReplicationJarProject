@@ -135,7 +135,8 @@ public class BackUpCoordinator {
                                 consumerOutputStream.writeObject(voteRequest);
                                 VoteRequest voteConsumerResponse = (VoteRequest) consumerInputStream.readObject();
                                 System.out.println("Consumer Vote Request Response: "+voteConsumerResponse);
-
+                                voteRequest.setAbort(voteConsumerResponse.getAbort());
+                                voteRequest.setCommit(voteConsumerResponse.getCommit());
                             }catch (Exception e){
                                 System.out.println("Ocurrio un error: "+e);
                                 e.printStackTrace();
@@ -151,14 +152,15 @@ public class BackUpCoordinator {
                                 System.out.println("CONEXION CON EL Producer ESTABLECIDA");
 
                                 producerOutputStream.writeObject(voteRequest);
-                                VoteRequest voteConsumerResponse = (VoteRequest) producerInputStream.readObject();
-
-
+                                VoteRequest voteProducerResponse = (VoteRequest) producerInputStream.readObject();
+                                System.out.println("Producer Vote Request Response: "+voteProducerResponse);
+                                voteRequest.setAbort(voteProducerResponse.getAbort());
+                                voteRequest.setCommit(voteProducerResponse.getCommit());
                             }catch (Exception e){
                                 System.out.println("Ocurrio un error: "+e);
                                 e.printStackTrace();
                             }
-                            System.out.println("BackUp request fulfilled: ");
+                            System.out.println("BackUp request fulfilled: "+voteRequest);
 
                             break;
                         case "VoteRequest": //Receives the vote response of producer or consumer

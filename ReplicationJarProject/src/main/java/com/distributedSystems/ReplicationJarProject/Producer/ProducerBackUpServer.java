@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Random;
 
 public class ProducerBackUpServer {
 
@@ -27,6 +28,7 @@ public class ProducerBackUpServer {
             System.out.println("SERVIDOR ESPERANDO CLIENTES EN PUERTO: "+port);
             serverSocket = new ServerSocket(port);
 
+            while (true) {
             Socket clientSocket =   serverSocket.accept();
 
             outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -38,11 +40,14 @@ public class ProducerBackUpServer {
             Object request =  inputStream.readObject(); //Receives a request
             switch (request.getClass().getSimpleName()) {
                 case "VoteRequest":
+                    Random rand = new Random();
                     VoteRequest voteRequest = (VoteRequest) request;
-                    //todo send back response
+                    if (rand.nextBoolean()) voteRequest.setCommit(voteRequest.getCommit() + 1);
+                    else voteRequest.setAbort(voteRequest.getAbort() + 1);
+                    outputStream.writeObject(voteRequest);
                     break;
             }
-
+            }
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error: "+e);
