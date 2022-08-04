@@ -30,7 +30,7 @@ public class JarService {
 
     public ProductResponse getProduct(int number, String type) throws RemoteException {
         ProductResponse response = jarIf.getProduct(number, type);
-        System.out.println("RESULTADO JAR Service: "+response);
+        System.out.println("GET PRODUCT JAR Service: "+response);
         return response;
     }
 
