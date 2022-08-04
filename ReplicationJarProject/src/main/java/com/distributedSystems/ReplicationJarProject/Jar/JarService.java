@@ -1,5 +1,6 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
 import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
@@ -68,6 +69,8 @@ public class JarService {
                     new Date()
             );
             outputStream.writeObject(backUpRequest);
+            GlobalRequest response = (GlobalRequest) inputStream.readObject();
+            System.out.println("MAIN SERVER COMMIT RESULT: "+ response);
 
 
         }catch (Exception e){

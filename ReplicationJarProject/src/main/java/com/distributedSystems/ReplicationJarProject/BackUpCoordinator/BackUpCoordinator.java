@@ -106,6 +106,47 @@ public class BackUpCoordinator {
             }
         }
 
+        public VoteRequest requestVote( int port, VoteRequest voteRequest){
+            VoteRequest voteResponse  = null;
+            try{
+                Socket socket = new Socket("localhost",port);
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+
+                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+
+                System.out.println("CONEXION CON "+port+" ESTABLECIDA PARA VOTE REQUEST");
+
+                outputStream.writeObject(voteRequest);
+                voteResponse = (VoteRequest) inputStream.readObject();
+                System.out.println("Consumer Vote Request Response: "+voteResponse);
+
+            }catch (Exception e){
+                System.out.println("Ocurrio un error: "+e);
+                e.printStackTrace();
+            }
+            return voteResponse;
+        }
+        public void sendGlobalRequest( int port, GlobalRequest globalRequest){
+
+            try{
+                Socket socket = new Socket("localhost",port);
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+
+                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+
+                System.out.println("CONEXION CON "+port+" ESTABLECIDA PARA GLOBAL REQUEST");
+
+                outputStream.writeObject(globalRequest);
+               String response = (String) inputStream.readObject();
+                System.out.println("Consumer Vote Request Response: "+response);
+
+            }catch (Exception e){
+                System.out.println("Ocurrio un error: "+e);
+                e.printStackTrace();
+            }
+
+        }
+
         public void run() {
 
             try {
@@ -124,55 +165,26 @@ public class BackUpCoordinator {
                             System.out.println("BackUp request received: " + backUpRequest);
                             VoteRequest voteRequest = new VoteRequest();
                             //Establece conexion con el consumer
-                            try{
-                                Socket socket = new Socket("localhost",4446);
-                                ObjectOutputStream consumerOutputStream = new ObjectOutputStream(socket.getOutputStream());
 
-                                ObjectInputStream consumerInputStream = new ObjectInputStream(socket.getInputStream());
+                            voteRequest = requestVote(4446, voteRequest);
 
-                                System.out.println("CONEXION CON EL CONSUMER ESTABLECIDA");
-
-                                consumerOutputStream.writeObject(voteRequest);
-                                VoteRequest voteConsumerResponse = (VoteRequest) consumerInputStream.readObject();
-                                System.out.println("Consumer Vote Request Response: "+voteConsumerResponse);
-                                voteRequest.setAbort(voteConsumerResponse.getAbort());
-                                voteRequest.setCommit(voteConsumerResponse.getCommit());
-                            }catch (Exception e){
-                                System.out.println("Ocurrio un error: "+e);
-                                e.printStackTrace();
-                            }
                             //Establece consexión con el producer
-
-                            try{
-                                Socket socket = new Socket("localhost",4447);
-                                ObjectOutputStream producerOutputStream = new ObjectOutputStream(socket.getOutputStream());
-
-                                ObjectInputStream producerInputStream = new ObjectInputStream(socket.getInputStream());
-
-                                System.out.println("CONEXION CON EL Producer ESTABLECIDA");
-
-                                producerOutputStream.writeObject(voteRequest);
-                                VoteRequest voteProducerResponse = (VoteRequest) producerInputStream.readObject();
-                                System.out.println("Producer Vote Request Response: "+voteProducerResponse);
-                                voteRequest.setAbort(voteProducerResponse.getAbort());
-                                voteRequest.setCommit(voteProducerResponse.getCommit());
-                            }catch (Exception e){
-                                System.out.println("Ocurrio un error: "+e);
-                                e.printStackTrace();
+                            voteRequest = requestVote(4447, voteRequest);
+                            GlobalRequest globalRequest = null;
+                            if(voteRequest.commit >=2){
+                               globalRequest = new GlobalRequest(true);
+                               logTransaction(backUpRequest);
+                            }else{
+                                globalRequest = new GlobalRequest(false);
                             }
-                            System.out.println("BackUp request fulfilled: "+voteRequest);
+
+                            sendGlobalRequest(4446, globalRequest); //ENVIA RESULTADO A CONSUMER
+                            sendGlobalRequest(4446, globalRequest); //ENVIA RESULTADO A PRODUCER
+
+                            out.writeObject(globalRequest); //PARA NOTIFICAR AL SERVER EL RESULTADO DE LA OPERACION
 
                             break;
-                        case "VoteRequest": //Receives the vote response of producer or consumer
 
-//                            VoteRequest voteRequest = (VoteRequest) request;
-//                            System.out.println("Vote Request received: " + voteRequest);
-
-                           //todo manejar logica de votos para el global commit
-
-                            //log("Ingredient Request response: " + response);
-
-                            break;
                         default:
                             System.out.println("Request not recognized, request received: " + request.getClass().getSimpleName());
                             //log("Server received an unrecognized Request : " + request);
