@@ -1,8 +1,16 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.Date;
 
+
+
+@Data
+//@AllArgsConstructor
+@NoArgsConstructor
 public class Register implements Serializable {
 
     String name;
@@ -39,14 +47,7 @@ public class Register implements Serializable {
         this.date = date;
     }
 
-    public Register(String name) {
-        this.name = name;
-        this.type = "A";
-        this.amount = -1;
-        this.operation = "operation";
-        this.remaining = -1;
-        this.date = new Date();
-    }
+
 
     public String getName() {
         return name;
@@ -94,5 +95,17 @@ public class Register implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+
+    @Override
+    public String toString() {
+        return "{ name: "+name+", \n " +
+                "type: "+type+", \n "+
+                "amount: "+amount+", \n "+
+                "operation: "+operation+", \n "+
+                "remaining: "+remaining+", \n "+
+                "date: "+date+", \n "+
+                " }";
     }
 }

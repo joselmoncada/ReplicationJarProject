@@ -27,8 +27,8 @@ public class ConsumerService {
     }
 
     public List<Register> getMovements(){
-        Register[] response = restTemplate.getForObject(GET_PRODUCT_URL, Register[].class);
-        System.out.println("GET PRODUCT RESPONSE: "+response);
+        Register[] response = restTemplate.getForObject(GET_MOVEMENTS_URL, Register[].class);
+        System.out.println("GET MOVEMENTS RESPONSE: "+response);
         return Arrays.asList(response);
     }
 }
