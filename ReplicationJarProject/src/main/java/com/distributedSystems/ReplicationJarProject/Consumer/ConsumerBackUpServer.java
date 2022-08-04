@@ -26,6 +26,7 @@ public class ConsumerBackUpServer {
             System.out.println("SERVIDOR ESPERANDO CLIENTES EN PUERTO: "+port);
             serverSocket = new ServerSocket(port);
 
+            while (true) {
              Socket clientSocket =   serverSocket.accept();
 
              outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -37,10 +38,14 @@ public class ConsumerBackUpServer {
                  Object request =  inputStream.readObject(); //Receives a request
                  switch (request.getClass().getSimpleName()) {
                      case "VoteRequest":
-                         VoteRequest voteRequest = (VoteRequest) request;
-                        //todo send back response
-                         break;
+                        Random rand = new Random();
+                        VoteRequest voteRequest = (VoteRequest) request;
+                        if (rand.nextBoolean()) voteRequest.setCommit(voteRequest.getCommit() + 1);
+                        else voteRequest.setAbort(voteRequest.getAbort() + 1);
+                        outputStream.writeObject(voteRequest);
+                        break;
                  }
+            }
 
 
         } catch (IOException | ClassNotFoundException e) {

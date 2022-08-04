@@ -87,7 +87,9 @@ public class JarRMIServer {
                 object.put("type", register.getType());
                 object.put("amount", register.getAmount());
                 object.put("operation", register.getOperation());
-                object.put("remaining", register.getRemaining());
+                if (register.getType().equals("A")) object.put("remaining", getProducts_A());
+                else if (register.getType().equals("B")) object.put("remaining", getProducts_B());
+                else object.put("remaining", register.getRemaining());
                 object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(register.getDate()));
                 movementList.add(object);
                 try {
@@ -165,7 +167,7 @@ public class JarRMIServer {
 
         public ProductResponse getProduct(int number, String type) {
             ProductResponse response = null;
-            if (type == "A") {
+            if (type.equals("A")) {
                 if (products_A >= number) {
                     products_A = products_A - number;
                     response = new ProductResponse(number, type);

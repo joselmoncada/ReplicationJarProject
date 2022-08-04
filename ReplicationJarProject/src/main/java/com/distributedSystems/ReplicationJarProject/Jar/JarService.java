@@ -4,6 +4,8 @@ import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteReques
 import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
 import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
+
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.ObjectInputStream;
@@ -37,12 +39,15 @@ public class JarService {
     public ProductResponse getProduct(int number, String type) throws RemoteException {
         ProductResponse response = jarIf.getProduct(number, type);
         System.out.println("GET PRODUCT JAR Service: "+response);
+        jarIf.logTransaction(new Register("Consumer", type, number, "GET"));
         return response;
     }
 
     public FillingResponse fillJar()  throws RemoteException {
         FillingResponse response = jarIf.fillJar();
         System.out.println("FILL JAR: "+ response);
+        jarIf.logTransaction(new Register("Producer", "A", 60, "FILL"));
+        jarIf.logTransaction(new Register("Producer", "B", 40, "FILL"));
         return response;
     }
 
@@ -70,7 +75,10 @@ public class JarService {
             e.printStackTrace();
         }
 
-        return "En espera para confirmar cambios...";
+        JSONObject response = new JSONObject();
+        response.put("message", "Waiting...");
+
+        return response.toJSONString();
     }
 
     public String restoreState()  throws RemoteException{
