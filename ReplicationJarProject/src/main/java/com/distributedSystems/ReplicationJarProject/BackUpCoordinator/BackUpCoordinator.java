@@ -1,6 +1,5 @@
 package com.distributedSystems.ReplicationJarProject.BackUpCoordinator;
 
-import com.distributedSystems.ReplicationJarProject.Jar.Register;
 import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -69,13 +68,13 @@ public class BackUpCoordinator {
 
         }
 
-        public void logTransaction(BackUpRequest request) throws RemoteException {
+        public void saveStateJSON(BackUpRequest request) throws RemoteException {
             JSONParser parser = new JSONParser();
-            JSONArray movementList = new JSONArray();
+            JSONArray stateList = new JSONArray();
             try {
                 reader = new FileReader("states.json");
                 Object object = parser.parse(reader);
-                movementList = (JSONArray) object;
+                stateList = (JSONArray) object;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -89,10 +88,10 @@ public class BackUpCoordinator {
             object.put("productA", request.getProduct_A_amount());
             object.put("productB", request.getGetProduct_B_amount());
             object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()));
-            movementList.add(object);
+            stateList.add(object);
             try {
-                file = new FileWriter("movements.json");
-                file.write(movementList.toJSONString());
+                file = new FileWriter("states.json");
+                file.write(stateList.toJSONString());
                 System.out.println("Logged " + object);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -173,7 +172,7 @@ public class BackUpCoordinator {
                             GlobalRequest globalRequest = null;
                             if(voteRequest.commit >=2){
                                globalRequest = new GlobalRequest(true);
-                               logTransaction(backUpRequest);
+                               saveStateJSON(backUpRequest);
                             }else{
                                 globalRequest = new GlobalRequest(false);
                             }

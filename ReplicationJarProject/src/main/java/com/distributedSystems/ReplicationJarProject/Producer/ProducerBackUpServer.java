@@ -1,5 +1,6 @@
 package com.distributedSystems.ReplicationJarProject.Producer;
 
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 import com.distributedSystems.ReplicationJarProject.Consumer.ConsumerBackUpServer;
 
@@ -35,7 +36,7 @@ public class ProducerBackUpServer {
 
             inputStream = new ObjectInputStream(clientSocket.getInputStream());
 
-            System.out.println("CONEXION CON EL BACKUP COORDINATOR FUNCIONA");
+            System.out.println("CONEXION CON EL BACKUP COORDINATOR ");
 
             Object request =  inputStream.readObject(); //Receives a request
             switch (request.getClass().getSimpleName()) {
@@ -46,8 +47,27 @@ public class ProducerBackUpServer {
                     else voteRequest.setAbort(voteRequest.getAbort() + 1);
                     outputStream.writeObject(voteRequest);
                     break;
+                case "GlobalRequest":
+                    GlobalRequest globalRequest = (GlobalRequest) request;
+                    if(globalRequest.isCommit()){
+                        System.out.println("GLOBAL_COMMIT: SE HAN CONFIRMADO LOS CAMBIOS");
+                        outputStream.writeObject(new String("PRODUCER: COMMIT CONFIRMADO"));
+                    }else{
+                        System.out.println("GLOBAL_ABORT: COMMIT ABORTADO");
+                        outputStream.writeObject(new String("PRODUCER: COMMIT ABORTADO"));
+                    }
+
+
+                    break;
+                default:
+                    break;
             }
+                inputStream.close();
+                outputStream.close();
+                clientSocket.close();
+                System.out.println("Server closed socket for request:"+request+", Thread: "+Thread.currentThread().getId());
             }
+
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error: "+e);

@@ -1,6 +1,7 @@
 package com.distributedSystems.ReplicationJarProject.Consumer;
 
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.BackUpCoordinator;
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 
 import java.io.IOException;
@@ -44,7 +45,24 @@ public class ConsumerBackUpServer {
                         else voteRequest.setAbort(voteRequest.getAbort() + 1);
                         outputStream.writeObject(voteRequest);
                         break;
+                     case "GlobalRequest":
+                         GlobalRequest globalRequest = (GlobalRequest) request;
+                         if(globalRequest.isCommit()){
+                             System.out.println("GLOBAL_COMMIT: SE HAN CONFIRMADO LOS CAMBIOS");
+                             outputStream.writeObject(new String("PRODUCER: COMMIT CONFIRMADO"));
+                         }else{
+                             System.out.println("GLOBAL_ABORT: COMMIT ABORTADO");
+                             outputStream.writeObject(new String("PRODUCER: COMMIT ABORTADO"));
+                         }
+
+                         break;
+                     default:
+                         break;
                  }
+                inputStream.close();
+                outputStream.close();
+                clientSocket.close();
+                System.out.println("Server closed socket for request:"+request+", Thread: "+Thread.currentThread().getId());
             }
 
 
