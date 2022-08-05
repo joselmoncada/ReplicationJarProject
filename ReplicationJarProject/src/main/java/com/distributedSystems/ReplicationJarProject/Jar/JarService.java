@@ -1,5 +1,6 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.RestoreRequest;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
@@ -85,7 +86,28 @@ public class JarService {
     }
 
     public String restoreState()  throws RemoteException{
-        return "Restaurando estado...";
+
+        try {
+            Socket socket = new Socket("localhost",4444);
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+            System.out.println("Connected to the backup coordinator.");
+
+            RestoreRequest request = new RestoreRequest();
+            outputStream.writeObject(request);
+            RestoreRequest response = (RestoreRequest) inputStream.readObject();
+            if (response.requestValid())
+                jarIf.loadProducts(response.getProductA(), response.getProductB());
+            else
+                System.out.println("Failed to restore backup: One of the backups received was different.");
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+
+        JSONObject response = new JSONObject();
+        response.put("message", "Waiting...");
+
+        return response.toJSONString();
     }
 //
 }

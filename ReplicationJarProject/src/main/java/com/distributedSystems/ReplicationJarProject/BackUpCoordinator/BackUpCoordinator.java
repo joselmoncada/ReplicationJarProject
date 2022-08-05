@@ -68,6 +68,38 @@ public class BackUpCoordinator {
 
         }
 
+        public RestoreRequest loadStateJSON() {
+            JSONParser parser = new JSONParser();
+            JSONArray stateList = new JSONArray();
+            RestoreRequest temporary = new RestoreRequest();
+            System.out.println("Loading states...");
+        
+            // Reading the JSON and getting the States
+            try {
+                reader = new FileReader("states.json");
+                Object object = parser.parse(reader);
+                stateList = (JSONArray) object;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            // Convert the last State
+            try {
+                JSONObject o = (JSONObject) stateList.get(stateList.size() - 1);
+                temporary.setProductA(Integer.valueOf(o.get("productA").toString()));
+                temporary.setProductB(Integer.valueOf(o.get("productB").toString()));
+            } catch (Exception e) { // Gets here if stateList is empty
+                e.printStackTrace();
+            }
+        
+            return temporary;
+        }
+
         public void saveStateJSON(BackUpRequest request) throws RemoteException {
             JSONParser parser = new JSONParser();
             JSONArray stateList = new JSONArray();
@@ -125,6 +157,25 @@ public class BackUpCoordinator {
             }
             return voteResponse;
         }
+
+        public RestoreRequest getBackUp(int port) {
+            RestoreRequest temporary = new RestoreRequest();
+            try {
+                Socket socket = new Socket("localhost", port);
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+                System.out.println("Connection succesful. Getting back up information...");
+
+                outputStream.writeObject(temporary);
+                temporary = (RestoreRequest) inputStream.readObject();
+                System.out.println("Obtained response: " + temporary);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return temporary;
+        }
+
         public void sendGlobalRequest( int port, GlobalRequest globalRequest){
 
             try{
@@ -137,7 +188,7 @@ public class BackUpCoordinator {
 
                 outputStream.writeObject(globalRequest);
                String response = (String) inputStream.readObject();
-                System.out.println("Consumer Vote Request Response: "+response);
+                System.out.println("Consumer Vote Request Response: " + response);
 
             }catch (Exception e){
                 System.out.println("Ocurrio un error: "+e);
@@ -178,12 +229,20 @@ public class BackUpCoordinator {
                             }
 
                             sendGlobalRequest(4446, globalRequest); //ENVIA RESULTADO A CONSUMER
-                            sendGlobalRequest(4446, globalRequest); //ENVIA RESULTADO A PRODUCER
+                            sendGlobalRequest(4447, globalRequest); //ENVIA RESULTADO A PRODUCER
 
                             out.writeObject(globalRequest); //PARA NOTIFICAR AL SERVER EL RESULTADO DE LA OPERACION
 
                             break;
 
+                        case "RestoreRequest": // Restore a backup
+                            RestoreRequest restoreRequest = new RestoreRequest();
+                            System.out.println("Request to restore received: " + restoreRequest);
+                            RestoreRequest consumerBackUp = getBackUp(4446); // Get BackUp from Consumer
+                            RestoreRequest producerBackUp = getBackUp(4447); // Get BackUp from Producer
+                            if (consumerBackUp.equals(producerBackUp)) out.writeObject(consumerBackUp);
+                            else out.writeObject(restoreRequest); // If different, send default request
+                            break;
                         default:
                             System.out.println("Request not recognized, request received: " + request.getClass().getSimpleName());
                             //log("Server received an unrecognized Request : " + request);
