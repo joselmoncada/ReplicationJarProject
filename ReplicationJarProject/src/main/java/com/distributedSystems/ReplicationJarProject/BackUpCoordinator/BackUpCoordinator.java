@@ -242,7 +242,7 @@ public class BackUpCoordinator {
 
                             break;
 
-                        case "RestoreRequest": // Restore a backup
+                        case "StateRegister": // Restore a backup
                             StateRegister stateRegister = new StateRegister();
                             System.out.println("Request to restore received: " + stateRegister);
                             StateRegister consumerBackUp = getBackUp("localhost",4446); // Get BackUp from Consumer

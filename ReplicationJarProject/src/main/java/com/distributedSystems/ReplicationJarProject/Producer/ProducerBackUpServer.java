@@ -109,7 +109,7 @@ public class ProducerBackUpServer {
                     else voteRequest.setAbort(voteRequest.getAbort() + 1);
                     outputStream.writeObject(voteRequest);
                     break;
-                case "RestoreRequest":
+                case "StateRegister":
                     System.out.println("Sending local backup");
                     outputStream.writeObject(loadStateJSON());
                     break; 

@@ -121,7 +121,7 @@ public class ConsumerBackUpServer {
                          }
 
                          break;
-                    case "RestoreRequest":
+                    case "StateRegister":
                         System.out.println("Sending local backup");
                         outputStream.writeObject(loadStateJSON());
                         break; 
