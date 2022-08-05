@@ -10,8 +10,8 @@ import java.util.List;
 public class ConsumerService {
 
 
-    final String  GET_PRODUCT_URL = "http://localhost:8100/api/v1/jar/get-product";
-    final String  GET_MOVEMENTS_URL = "http://localhost:8100/api/v1/jar/get-movements";
+    final String  GET_PRODUCT_URL = "http://172.27.185.163:8100/api/v1/jar/get-product";
+    final String  GET_MOVEMENTS_URL = "http://172.27.185.163:8100/api/v1/jar/get-movements";
 
 
     RestTemplate restTemplate;

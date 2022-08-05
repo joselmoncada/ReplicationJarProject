@@ -9,9 +9,9 @@ import java.util.Scanner;
 public class ProducerService {
 
 
-    final String  FILL_JAR_URL = "http://localhost:8100/api/v1/jar/fill-jar";
-    final String  SAVE_STATE_URL = "http://localhost:8100/api/v1/jar/save-state";
-    final String  RESTORE_STATE_URL = "http://localhost:8100/api/v1/jar/restore-state";
+    final String  FILL_JAR_URL = "http://172.27.185.163:8100/api/v1/jar/fill-jar";
+    final String  SAVE_STATE_URL = "http://172.27.185.163:8100/api/v1/jar/save-state";
+    final String  RESTORE_STATE_URL = "http://172.27.185.163:8100/api/v1/jar/restore-state";
 
 
     RestTemplate restTemplate;
