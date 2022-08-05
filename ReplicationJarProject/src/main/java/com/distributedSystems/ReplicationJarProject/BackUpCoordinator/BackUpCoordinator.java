@@ -220,10 +220,10 @@ public class BackUpCoordinator {
                             VoteRequest voteRequest = new VoteRequest();
                             //Establece conexion con el consumer
 
-                            voteRequest = requestVote("172.27.69.66",4446, voteRequest); //CONSUMER
+                            voteRequest = requestVote("localhost",4446, voteRequest); //CONSUMER
 
                             //Establece consexión con el producer
-                            voteRequest = requestVote("172.27.29.128",4447, voteRequest); //PRODUCER
+                            voteRequest = requestVote("localhost",4447, voteRequest); //PRODUCER
                             GlobalRequest globalRequest = null;
                             if(voteRequest.commit >=2){
 
@@ -235,8 +235,8 @@ public class BackUpCoordinator {
                                 globalRequest = new GlobalRequest(false);
                             }
 
-                            sendGlobalRequest("172.27.69.66",4446, globalRequest); //ENVIA RESULTADO A CONSUMER
-                            sendGlobalRequest("172.27.29.128",4447, globalRequest); //ENVIA RESULTADO A PRODUCER
+                            sendGlobalRequest("localhost",4446, globalRequest); //ENVIA RESULTADO A CONSUMER
+                            sendGlobalRequest("localhost",4447, globalRequest); //ENVIA RESULTADO A PRODUCER
 
                             out.writeObject(globalRequest); //PARA NOTIFICAR AL SERVER EL RESULTADO DE LA OPERACION
 
@@ -245,8 +245,8 @@ public class BackUpCoordinator {
                         case "RestoreRequest": // Restore a backup
                             StateRegister stateRegister = new StateRegister();
                             System.out.println("Request to restore received: " + stateRegister);
-                            StateRegister consumerBackUp = getBackUp("172.27.69.66",4446); // Get BackUp from Consumer
-                            StateRegister producerBackUp = getBackUp("172.27.29.128",4447); // Get BackUp from Producer
+                            StateRegister consumerBackUp = getBackUp("localhost",4446); // Get BackUp from Consumer
+                            StateRegister producerBackUp = getBackUp("localhost",4447); // Get BackUp from Producer
                             if (consumerBackUp.equals(producerBackUp)) out.writeObject(consumerBackUp);
                             else out.writeObject(stateRegister); // If different, send default request
                             break;

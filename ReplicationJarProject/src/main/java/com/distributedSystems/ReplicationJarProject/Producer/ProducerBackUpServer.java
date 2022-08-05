@@ -4,12 +4,12 @@ import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequ
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.StateRegister;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import org.json.simple.JSONArray;
@@ -23,12 +23,36 @@ public class ProducerBackUpServer {
     public ObjectInputStream inputStream;
     private ServerSocket serverSocket = null;
     private FileReader reader;
+    private  FileWriter file;
 
     public static void main(String[] args){
         new ProducerBackUpServer().startServer(4447);
 
     }
 
+    public void saveStateJSON(StateRegister request) throws RemoteException {
+        JSONParser parser = new JSONParser();
+        JSONArray stateList = new JSONArray();
+        JSONObject object = new JSONObject();
+        object.put("productA", request.getProductA());
+        object.put("productB", request.getProductB());
+        object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()));
+        stateList.add(object);
+        try {
+            file = new FileWriter("producerStates.json");
+            file.write(stateList.toJSONString());
+            System.out.println("Logged " + object);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                file.flush();
+                file.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     public StateRegister loadStateJSON() {
         JSONParser parser = new JSONParser();
         JSONArray stateList = new JSONArray();
@@ -37,7 +61,7 @@ public class ProducerBackUpServer {
     
         // Reading the JSON and getting the States
         try {
-            reader = new FileReader("states.json");
+            reader = new FileReader("producerStates.json");
             Object object = parser.parse(reader);
             stateList = (JSONArray) object;
         } catch (Exception e) {
@@ -93,6 +117,7 @@ public class ProducerBackUpServer {
                     GlobalRequest globalRequest = (GlobalRequest) request;
                     if(globalRequest.isCommit()){
                         System.out.println("GLOBAL_COMMIT: SE HAN CONFIRMADO LOS CAMBIOS");
+                        saveStateJSON(globalRequest.getStateRegister());
                         outputStream.writeObject(new String("PRODUCER: COMMIT CONFIRMADO"));
                     }else{
                         System.out.println("GLOBAL_ABORT: COMMIT ABORTADO");

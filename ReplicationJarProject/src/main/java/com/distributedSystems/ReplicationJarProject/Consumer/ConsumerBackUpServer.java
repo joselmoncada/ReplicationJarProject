@@ -114,10 +114,10 @@ public class ConsumerBackUpServer {
                          if(globalRequest.isCommit()){
                              System.out.println("GLOBAL_COMMIT: SE HAN CONFIRMADO LOS CAMBIOS");
                              saveStateJSON(globalRequest.getStateRegister());
-                             outputStream.writeObject(new String("PRODUCER: COMMIT CONFIRMADO"));
+                             outputStream.writeObject(new String("CONSUMER: COMMIT CONFIRMADO"));
                          }else{
                              System.out.println("GLOBAL_ABORT: COMMIT ABORTADO");
-                             outputStream.writeObject(new String("PRODUCER: COMMIT ABORTADO"));
+                             outputStream.writeObject(new String("CONSUMER: COMMIT ABORTADO"));
                          }
 
                          break;
