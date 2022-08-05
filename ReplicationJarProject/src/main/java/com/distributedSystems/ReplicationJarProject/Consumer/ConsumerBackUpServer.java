@@ -2,8 +2,10 @@ package com.distributedSystems.ReplicationJarProject.Consumer;
 
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.BackUpCoordinator;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.RestoreRequest;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,16 +13,53 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 public class ConsumerBackUpServer {
 //    private Socket socket;
     public ObjectOutputStream outputStream;
     public ObjectInputStream inputStream;
     private ServerSocket serverSocket = null;
+    private FileReader reader;
 
     public static void main(String[] args){
         new ConsumerBackUpServer().startServer(4446);
     }
 
+    public RestoreRequest loadStateJSON() {
+        JSONParser parser = new JSONParser();
+        JSONArray stateList = new JSONArray();
+        RestoreRequest temporary = new RestoreRequest();
+        System.out.println("Loading states...");
+    
+        // Reading the JSON and getting the States
+        try {
+            reader = new FileReader("states.json");
+            Object object = parser.parse(reader);
+            stateList = (JSONArray) object;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        // Convert the last State
+        try {
+            JSONObject o = (JSONObject) stateList.get(stateList.size() - 1);
+            temporary.setProductA(Integer.valueOf(o.get("productA").toString()));
+            temporary.setProductB(Integer.valueOf(o.get("productB").toString()));
+        } catch (Exception e) { // Gets here if stateList is empty
+            e.printStackTrace();
+        }
+    
+        return temporary;
+    }
+    
     public void startServer(int port) {
 
         try {
@@ -56,6 +95,10 @@ public class ConsumerBackUpServer {
                          }
 
                          break;
+                    case "RestoreRequest":
+                        System.out.println("Sending local backup");
+                        outputStream.writeObject(loadStateJSON());
+                        break; 
                      default:
                          break;
                  }

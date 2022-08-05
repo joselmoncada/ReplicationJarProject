@@ -129,6 +129,12 @@ public class JarRMIServer {
                 return jar.getProducts_B();
             }
 
+            @Override
+            public void loadProducts(int prodA, int prodB) throws RemoteException{
+                jar.setProducts_A(prodA);
+                jar.setProducts_B(prodB);
+            }
+
 
         }, 0);
 
