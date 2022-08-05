@@ -100,7 +100,7 @@ public class JarService {
             else
                 System.out.println("Failed to restore backup: One of the backups received was different.");
         } catch (Exception e) {
-            //TODO: handle exception
+            System.out.println("ERROR: "+ e);
         }
 
         JSONObject response = new JSONObject();

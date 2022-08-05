@@ -16,6 +16,8 @@ public class BackUpCoordinator {
 
 
     private ServerSocket serverSocket = null;
+    private final String CONSUMER_IP = "172.27.69.66";
+    private final String PRODUCER_IP = "172.27.69.66";
 
 
     public BackUpCoordinator(){
@@ -161,7 +163,7 @@ public class BackUpCoordinator {
         public StateRegister getBackUp(String ip, int port) {
             StateRegister temporary = new StateRegister();
             try {
-                Socket socket = new Socket("localhost", port);
+                Socket socket = new Socket(ip, port);
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
                 System.out.println("Connection succesful. Getting back up information...");
@@ -220,10 +222,10 @@ public class BackUpCoordinator {
                             VoteRequest voteRequest = new VoteRequest();
                             //Establece conexion con el consumer
 
-                            voteRequest = requestVote("localhost",4446, voteRequest); //CONSUMER
+                            voteRequest = requestVote(CONSUMER_IP,4446, voteRequest); //CONSUMER
 
                             //Establece consexión con el producer
-                            voteRequest = requestVote("localhost",4447, voteRequest); //PRODUCER
+                            voteRequest = requestVote(PRODUCER_IP,4447, voteRequest); //PRODUCER
                             GlobalRequest globalRequest = null;
                             if(voteRequest.commit >=2){
 
@@ -235,8 +237,8 @@ public class BackUpCoordinator {
                                 globalRequest = new GlobalRequest(false);
                             }
 
-                            sendGlobalRequest("localhost",4446, globalRequest); //ENVIA RESULTADO A CONSUMER
-                            sendGlobalRequest("localhost",4447, globalRequest); //ENVIA RESULTADO A PRODUCER
+                            sendGlobalRequest(CONSUMER_IP,4446, globalRequest); //ENVIA RESULTADO A CONSUMER
+                            sendGlobalRequest(PRODUCER_IP,4447, globalRequest); //ENVIA RESULTADO A PRODUCER
 
                             out.writeObject(globalRequest); //PARA NOTIFICAR AL SERVER EL RESULTADO DE LA OPERACION
 
@@ -245,8 +247,8 @@ public class BackUpCoordinator {
                         case "StateRegister": // Restore a backup
                             StateRegister stateRegister = new StateRegister();
                             System.out.println("Request to restore received: " + stateRegister);
-                            StateRegister consumerBackUp = getBackUp("localhost",4446); // Get BackUp from Consumer
-                            StateRegister producerBackUp = getBackUp("localhost",4447); // Get BackUp from Producer
+                            StateRegister consumerBackUp = getBackUp(CONSUMER_IP,4446); // Get BackUp from Consumer
+                            StateRegister producerBackUp = getBackUp(PRODUCER_IP,4447); // Get BackUp from Producer
                             if (consumerBackUp.equals(producerBackUp)) out.writeObject(consumerBackUp);
                             else out.writeObject(stateRegister); // If different, send default request
                             break;
