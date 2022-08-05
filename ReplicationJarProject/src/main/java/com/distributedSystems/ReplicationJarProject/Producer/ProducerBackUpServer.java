@@ -1,9 +1,8 @@
 package com.distributedSystems.ReplicationJarProject.Producer;
 
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
-import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.RestoreRequest;
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.StateRegister;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
-import com.distributedSystems.ReplicationJarProject.Consumer.ConsumerBackUpServer;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,10 +29,10 @@ public class ProducerBackUpServer {
 
     }
 
-    public RestoreRequest loadStateJSON() {
+    public StateRegister loadStateJSON() {
         JSONParser parser = new JSONParser();
         JSONArray stateList = new JSONArray();
-        RestoreRequest temporary = new RestoreRequest();
+        StateRegister temporary = new StateRegister();
         System.out.println("Loading states...");
     
         // Reading the JSON and getting the States

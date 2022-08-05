@@ -68,12 +68,12 @@ public class BackUpCoordinator {
 
         }
 
-        public RestoreRequest loadStateJSON() {
+        public StateRegister loadStateJSON() {
             JSONParser parser = new JSONParser();
             JSONArray stateList = new JSONArray();
-            RestoreRequest temporary = new RestoreRequest();
+            StateRegister temporary = new StateRegister();
             System.out.println("Loading states...");
-        
+
             // Reading the JSON and getting the States
             try {
                 reader = new FileReader("states.json");
@@ -96,7 +96,7 @@ public class BackUpCoordinator {
             } catch (Exception e) { // Gets here if stateList is empty
                 e.printStackTrace();
             }
-        
+
             return temporary;
         }
 
@@ -137,10 +137,10 @@ public class BackUpCoordinator {
             }
         }
 
-        public VoteRequest requestVote( int port, VoteRequest voteRequest){
+        public VoteRequest requestVote( String ip, int port, VoteRequest voteRequest){
             VoteRequest voteResponse  = null;
             try{
-                Socket socket = new Socket("localhost",port);
+                Socket socket = new Socket(ip,port);
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
 
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
@@ -158,8 +158,8 @@ public class BackUpCoordinator {
             return voteResponse;
         }
 
-        public RestoreRequest getBackUp(int port) {
-            RestoreRequest temporary = new RestoreRequest();
+        public StateRegister getBackUp(String ip, int port) {
+            StateRegister temporary = new StateRegister();
             try {
                 Socket socket = new Socket("localhost", port);
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -167,7 +167,7 @@ public class BackUpCoordinator {
                 System.out.println("Connection succesful. Getting back up information...");
 
                 outputStream.writeObject(temporary);
-                temporary = (RestoreRequest) inputStream.readObject();
+                temporary = (StateRegister) inputStream.readObject();
                 System.out.println("Obtained response: " + temporary);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -176,10 +176,10 @@ public class BackUpCoordinator {
             return temporary;
         }
 
-        public void sendGlobalRequest( int port, GlobalRequest globalRequest){
+        public void sendGlobalRequest( String ip, int port, GlobalRequest globalRequest){
 
             try{
-                Socket socket = new Socket("localhost",port);
+                Socket socket = new Socket(ip,port);
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
 
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
@@ -196,6 +196,10 @@ public class BackUpCoordinator {
             }
 
         }
+
+
+
+
 
         public void run() {
 
@@ -216,32 +220,35 @@ public class BackUpCoordinator {
                             VoteRequest voteRequest = new VoteRequest();
                             //Establece conexion con el consumer
 
-                            voteRequest = requestVote(4446, voteRequest);
+                            voteRequest = requestVote("172.27.69.66",4446, voteRequest); //CONSUMER
 
                             //Establece consexión con el producer
-                            voteRequest = requestVote(4447, voteRequest);
+                            voteRequest = requestVote("172.27.29.128",4447, voteRequest); //PRODUCER
                             GlobalRequest globalRequest = null;
                             if(voteRequest.commit >=2){
-                               globalRequest = new GlobalRequest(true);
+
                                saveStateJSON(backUpRequest);
+                                StateRegister lastState = loadStateJSON();
+                               globalRequest = new GlobalRequest(true, lastState); //Envia Global Commit con el State
+
                             }else{
                                 globalRequest = new GlobalRequest(false);
                             }
 
-                            sendGlobalRequest(4446, globalRequest); //ENVIA RESULTADO A CONSUMER
-                            sendGlobalRequest(4447, globalRequest); //ENVIA RESULTADO A PRODUCER
+                            sendGlobalRequest("172.27.69.66",4446, globalRequest); //ENVIA RESULTADO A CONSUMER
+                            sendGlobalRequest("172.27.29.128",4447, globalRequest); //ENVIA RESULTADO A PRODUCER
 
                             out.writeObject(globalRequest); //PARA NOTIFICAR AL SERVER EL RESULTADO DE LA OPERACION
 
                             break;
 
                         case "RestoreRequest": // Restore a backup
-                            RestoreRequest restoreRequest = new RestoreRequest();
-                            System.out.println("Request to restore received: " + restoreRequest);
-                            RestoreRequest consumerBackUp = getBackUp(4446); // Get BackUp from Consumer
-                            RestoreRequest producerBackUp = getBackUp(4447); // Get BackUp from Producer
+                            StateRegister stateRegister = new StateRegister();
+                            System.out.println("Request to restore received: " + stateRegister);
+                            StateRegister consumerBackUp = getBackUp("172.27.69.66",4446); // Get BackUp from Consumer
+                            StateRegister producerBackUp = getBackUp("172.27.29.128",4447); // Get BackUp from Producer
                             if (consumerBackUp.equals(producerBackUp)) out.writeObject(consumerBackUp);
-                            else out.writeObject(restoreRequest); // If different, send default request
+                            else out.writeObject(stateRegister); // If different, send default request
                             break;
                         default:
                             System.out.println("Request not recognized, request received: " + request.getClass().getSimpleName());

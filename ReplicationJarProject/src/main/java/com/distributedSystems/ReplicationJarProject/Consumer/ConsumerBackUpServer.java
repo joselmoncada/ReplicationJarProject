@@ -1,18 +1,18 @@
 package com.distributedSystems.ReplicationJarProject.Consumer;
 
-import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.BackUpCoordinator;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
-import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.RestoreRequest;
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.StateRegister;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
+import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,20 +23,45 @@ public class ConsumerBackUpServer {
     public ObjectInputStream inputStream;
     private ServerSocket serverSocket = null;
     private FileReader reader;
+    private  FileWriter file;
 
     public static void main(String[] args){
         new ConsumerBackUpServer().startServer(4446);
     }
 
-    public RestoreRequest loadStateJSON() {
+    public void saveStateJSON(StateRegister request) throws RemoteException {
         JSONParser parser = new JSONParser();
         JSONArray stateList = new JSONArray();
-        RestoreRequest temporary = new RestoreRequest();
+        JSONObject object = new JSONObject();
+        object.put("productA", request.getProductA());
+        object.put("productB", request.getProductB());
+        object.put("date", new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()));
+        stateList.add(object);
+        try {
+            file = new FileWriter("consumerStates.json");
+            file.write(stateList.toJSONString());
+            System.out.println("Logged " + object);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                file.flush();
+                file.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public StateRegister loadStateJSON() {
+        JSONParser parser = new JSONParser();
+        JSONArray stateList = new JSONArray();
+        StateRegister temporary = new StateRegister();
         System.out.println("Loading states...");
     
         // Reading the JSON and getting the States
         try {
-            reader = new FileReader("states.json");
+            reader = new FileReader("consumerStates.json");
             Object object = parser.parse(reader);
             stateList = (JSONArray) object;
         } catch (Exception e) {
@@ -88,6 +113,7 @@ public class ConsumerBackUpServer {
                          GlobalRequest globalRequest = (GlobalRequest) request;
                          if(globalRequest.isCommit()){
                              System.out.println("GLOBAL_COMMIT: SE HAN CONFIRMADO LOS CAMBIOS");
+                             saveStateJSON(globalRequest.getStateRegister());
                              outputStream.writeObject(new String("PRODUCER: COMMIT CONFIRMADO"));
                          }else{
                              System.out.println("GLOBAL_ABORT: COMMIT ABORTADO");

@@ -1,8 +1,7 @@
 package com.distributedSystems.ReplicationJarProject.Jar;
 
-import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.RestoreRequest;
+import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.StateRegister;
 import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.GlobalRequest;
-import com.distributedSystems.ReplicationJarProject.BackUpCoordinator.VoteRequest;
 import com.distributedSystems.ReplicationJarProject.Producer.BackUpRequest;
 import com.distributedSystems.ReplicationJarProject.Responses.FillingResponse;
 import com.distributedSystems.ReplicationJarProject.Responses.ProductResponse;
@@ -93,9 +92,9 @@ public class JarService {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
             System.out.println("Connected to the backup coordinator.");
 
-            RestoreRequest request = new RestoreRequest();
+            StateRegister request = new StateRegister();
             outputStream.writeObject(request);
-            RestoreRequest response = (RestoreRequest) inputStream.readObject();
+            StateRegister response = (StateRegister) inputStream.readObject();
             if (response.requestValid())
                 jarIf.loadProducts(response.getProductA(), response.getProductB());
             else

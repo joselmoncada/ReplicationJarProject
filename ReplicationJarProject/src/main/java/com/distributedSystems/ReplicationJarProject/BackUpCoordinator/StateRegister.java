@@ -2,11 +2,11 @@ package com.distributedSystems.ReplicationJarProject.BackUpCoordinator;
 
 import java.io.Serializable;
 
-public class RestoreRequest implements Serializable{
+public class StateRegister implements Serializable{
     private int productA;
     private int productB;
 
-    public RestoreRequest() {
+    public StateRegister() {
         productA = -1;
         productB = -1;
     }
@@ -32,7 +32,7 @@ public class RestoreRequest implements Serializable{
         else return true;
     }
 
-    public boolean equals(RestoreRequest reference) {
+    public boolean equals(StateRegister reference) {
         if (productA == reference.getProductA() && productB == reference.getProductB())
             return true;
         else
